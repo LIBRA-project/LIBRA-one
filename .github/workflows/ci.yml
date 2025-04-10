@@ -1,0 +1,26 @@
+name: Run OpenMC Model
+
+on: [push, pull_request]
+
+jobs:
+  run-model:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          environment-file: environment.yml
+          activate-environment: libra-one-env
+
+      # Run the model
+      - name: Run OpenMC Model
+        shell: bash -l {0}
+        workin-directory: .
+        run: |
+          python run_model.py --particles 1e4
