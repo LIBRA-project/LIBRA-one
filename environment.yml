@@ -1,0 +1,7 @@
+name: libra-one-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - openmc
