@@ -1,9 +1,7 @@
 import openmc
 import openmc.model
 import numpy as np
-import os
 import single_wall_model
-import matplotlib.pyplot as plt
 import openmc_data_downloader as odd
 
 reflector_thickness = 10
@@ -54,11 +52,6 @@ settings.particles = int(1e5)
 # settings.volume_calculations = [vol]
 # settings.photon_transport = True
 settings.photon_transport = False
-
-# directory = f"BrHt={breeder_height:.0f}cm_BrTh={breeder_thickness:.0f}_RefTh={reflector_thickness:.0f}"
-# if not os.path.isdir(directory):
-#     os.mkdir(directory)
-# os.chdir(directory)
 
 libra_reg, libra_system_cell, materials, src, salt_cell, salt_material, salt_vol = (
     single_wall_model.build_libra_xl(
@@ -128,8 +121,7 @@ model = openmc.Model(
 )
 model.export_to_model_xml()
 model.plot_geometry()
-if not os.path.exists("statepoint.100.h5"):
-    model.run(threads=14)
+model.run()
 
 sp = openmc.StatePoint("statepoint.100.h5")
 t_tally = sp.get_tally(name="tritium tally")
@@ -137,6 +129,5 @@ tbr = np.sum(t_tally.get_reshaped_data(value="mean").squeeze())
 tbr_err = np.sqrt(
     np.sum(np.square(t_tally.get_reshaped_data(value="std_dev").squeeze()))
 )
-os.chdir("..")
 
 print("TBR = {:.4f} +/- {:.4f}".format(tbr, tbr_err))
