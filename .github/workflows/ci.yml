@@ -21,6 +21,6 @@ jobs:
       # Run the model
       - name: Run OpenMC Model
         shell: bash -l {0}
-        workin-directory: .
+        working-directory: .
         run: |
           python run_model.py --particles 1e4
