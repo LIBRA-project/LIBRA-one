@@ -1,8 +1,10 @@
 import openmc
+import openmc.model
 import numpy as np
 import os
 import single_wall_model
 import matplotlib.pyplot as plt
+import openmc_data_downloader as odd
 
 reflector_thickness = 10
 
@@ -53,10 +55,10 @@ settings.particles = int(1e5)
 # settings.photon_transport = True
 settings.photon_transport = False
 
-directory = f"BrHt={breeder_height:.0f}cm_BrTh={breeder_thickness:.0f}_RefTh={reflector_thickness:.0f}"
-if not os.path.isdir(directory):
-    os.mkdir(directory)
-os.chdir(directory)
+# directory = f"BrHt={breeder_height:.0f}cm_BrTh={breeder_thickness:.0f}_RefTh={reflector_thickness:.0f}"
+# if not os.path.isdir(directory):
+#     os.mkdir(directory)
+# os.chdir(directory)
 
 libra_reg, libra_system_cell, materials, src, salt_cell, salt_material, salt_vol = (
     single_wall_model.build_libra_xl(
@@ -108,6 +110,14 @@ plot1.origin = [0, 0, 25]
 plot1.color_by = "material"
 
 plots = openmc.Plots([plot1])
+
+odd.download_cross_section_data(
+    materials,
+    libraries=["ENDFB-8.0-NNDC"],
+    set_OPENMC_CROSS_SECTIONS=True,
+    particles=["neutron"],
+    destination="cross_sections",
+)
 
 model = openmc.Model(
     geometry=geometry,

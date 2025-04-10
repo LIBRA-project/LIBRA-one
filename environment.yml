@@ -5,3 +5,7 @@ channels:
 dependencies:
   - python
   - openmc
+  - pip
+  - pip:
+    - libra-toolbox>=0.6
+    - openmc_data_downloader

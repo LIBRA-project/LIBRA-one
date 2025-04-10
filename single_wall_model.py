@@ -189,7 +189,6 @@ def build_libra_xl(
     materials = openmc.Materials(
         [
             inconel625,
-            flibe_nat,
             air,
             beryllium,
             lead,
