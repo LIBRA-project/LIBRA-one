@@ -1,8 +1,21 @@
+import argparse
 import openmc
 import openmc.model
 import numpy as np
 import single_wall_model
 import openmc_data_downloader as odd
+
+# Argument parser for command-line options
+parser = argparse.ArgumentParser(
+    description="Run the OpenMC model with configurable parameters."
+)
+parser.add_argument(
+    "--particles",
+    type=float,
+    default=1e5,
+    help="Number of particles to simulate (default: 1e5)",
+)
+args = parser.parse_args()
 
 reflector_thickness = 10
 
@@ -48,7 +61,7 @@ settings = openmc.Settings()
 settings.run_mode = "fixed source"
 settings.batches = 100
 settings.inactive = 0
-settings.particles = int(1e5)
+settings.particles = int(args.particles)
 # settings.volume_calculations = [vol]
 # settings.photon_transport = True
 settings.photon_transport = False
