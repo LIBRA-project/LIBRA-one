@@ -15,7 +15,8 @@ parser.add_argument(
     default=1e5,
     help="Number of particles to simulate (default: 1e5)",
 )
-args = parser.parse_args()
+args, unknown = parser.parse_known_args()
+
 
 reflector_thickness = 10
 
@@ -106,7 +107,16 @@ t_li_tally.nuclides = ["Li6", "Li7"]
 t_li_tally.scores = ["(n,Xt)"]
 
 
-tallies = openmc.Tallies([t_tally, t_li_tally])
+t_tally_mesh = openmc.Tally(name="(n,Xt) tally mesh")
+mesh = openmc.CylindricalMesh(
+    r_grid=np.linspace(4.75 * 2.54, breeder_thickness, 100),
+    phi_grid=np.linspace(0, 2 * np.pi, 100),
+    z_grid=np.linspace(0, breeder_height, 100),
+)
+t_tally_mesh.filters.append(openmc.MeshFilter(mesh))
+t_tally_mesh.scores = ["(n,Xt)"]
+
+tallies = openmc.Tallies([t_tally, t_li_tally, t_tally_mesh])
 
 plot1 = openmc.Plot.from_geometry(geometry)
 plot1.pixels = (1000, 1500)
@@ -134,13 +144,16 @@ model = openmc.Model(
 )
 model.export_to_model_xml()
 model.plot_geometry()
-model.run()
 
-sp = openmc.StatePoint("statepoint.100.h5")
-t_tally = sp.get_tally(name="tritium tally")
-tbr = np.sum(t_tally.get_reshaped_data(value="mean").squeeze())
-tbr_err = np.sqrt(
-    np.sum(np.square(t_tally.get_reshaped_data(value="std_dev").squeeze()))
-)
+if __name__ == "__main__":
+    # Run the model
+    model.run()
 
-print("TBR = {:.4f} +/- {:.4f}".format(tbr, tbr_err))
+    sp = openmc.StatePoint("statepoint.100.h5")
+    t_tally = sp.get_tally(name="tritium tally")
+    tbr = np.sum(t_tally.get_reshaped_data(value="mean").squeeze())
+    tbr_err = np.sqrt(
+        np.sum(np.square(t_tally.get_reshaped_data(value="std_dev").squeeze()))
+    )
+
+    print("TBR = {:.4f} +/- {:.4f}".format(tbr, tbr_err))

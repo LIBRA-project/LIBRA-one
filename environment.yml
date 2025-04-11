@@ -3,8 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python
+  - python>=3.10
   - openmc
+  - ipykernel
+  - nbconvert
+  - vtk
   - pip
   - pip:
     - libra-toolbox>=0.6

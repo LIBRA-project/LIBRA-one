@@ -172,3 +172,13 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+# openmc
+*.h5
+*.xml
+*.out
+*cross_sections
+
+*.png
+*.pkl
