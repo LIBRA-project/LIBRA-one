@@ -5,6 +5,7 @@ channels:
 dependencies:
   - python
   - openmc
+  - ipykernel
   - pip
   - pip:
     - libra-toolbox>=0.6
