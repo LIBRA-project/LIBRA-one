@@ -13,8 +13,8 @@ jobs:
 
       # might be missing these libs in the runner. Let's check in a few days if that's still needed
       - run: |
-          apt update
-          apt install libopenblas-base libopenblas-dev
+          sudo apt update
+          sudo apt install libopenblas-base libopenblas-dev
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
