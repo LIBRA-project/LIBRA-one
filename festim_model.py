@@ -120,8 +120,11 @@ model.settings.stepsize = F.Stepsize(
     milestones=[irradiation_time],
 )
 
+release_rate = F.SurfaceFlux(field=T, surface=top_surface)
+
 model.exports = [
     F.VTXSpeciesExport(filename="tritium_conc.bp", field=T),
+    release_rate,
 ]
 
 # from dolfinx import log
@@ -130,3 +133,25 @@ model.exports = [
 
 model.initialise()
 model.run()
+
+import matplotlib.pyplot as plt
+from scipy.integrate import cumulative_trapezoid
+import numpy as np
+
+wedge_angle = 22.5  # degrees
+cumulative_release = cumulative_trapezoid(release_rate.data, release_rate.t, initial=0)
+
+release_rate.data = (
+    np.array(release_rate.data) * 360 / wedge_angle
+)  # convert to release rate in cm2/s
+
+fig, axs = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+
+axs[0].plot(release_rate.t, release_rate.data)
+axs[0].set_ylabel("Release Rate (/s)")
+
+axs[1].plot(release_rate.t, cumulative_release)
+axs[1].set_xlabel("Time (s)")
+axs[1].set_ylabel("Cumulative Release (#)")
+
+plt.show()
