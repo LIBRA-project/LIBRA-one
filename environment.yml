@@ -8,6 +8,7 @@ dependencies:
   - ipykernel
   - nbconvert
   - vtk
+  - python-gmsh
   - festim=2.0a2
   - pip
   - pip:
