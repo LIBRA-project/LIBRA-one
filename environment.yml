@@ -7,6 +7,7 @@ dependencies:
   - openmc
   - ipykernel
   - nbconvert
+  - vtk
   - pip
   - pip:
     - libra-toolbox>=0.6
