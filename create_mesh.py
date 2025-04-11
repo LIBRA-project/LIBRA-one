@@ -22,10 +22,8 @@ if volume_tags:
     )  # Add all volumes to a physical group with tag 1
     gmsh.model.setPhysicalName(3, 1, "Volume")  # Set a name for the physical group
 
-# set mesh refinement
-gmsh.model.mesh.setSize(gmsh.model.getEntities(0), 0.1)  # Set global mesh size
-
 gmsh.model.mesh.generate(3)
+gmsh.model.mesh.setOrder(2)
 
 gmsh.model.geo.synchronize()
 gmsh.fltk.run()
