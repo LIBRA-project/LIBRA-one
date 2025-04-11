@@ -24,3 +24,8 @@ jobs:
         working-directory: .
         run: |
           python run_model.py --particles 1e4
+
+      - name: Run neutronics post-processing
+        shell: bash -l {0}
+        working-directory: .
+        run: jupyter-nbconvert --to notebook postprocessing.ipynb --execute
