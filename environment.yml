@@ -8,7 +8,9 @@ dependencies:
   - ipykernel
   - nbconvert
   - vtk
+  - festim=2.0a2
   - pip
   - pip:
     - libra-toolbox>=0.6
     - openmc_data_downloader
+    - git+https://github.com/festim-dev/openmc2dolfinx
