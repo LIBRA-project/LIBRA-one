@@ -108,8 +108,9 @@ t_li_tally.scores = ["(n,Xt)"]
 
 
 t_tally_mesh = openmc.Tally(name="(n,Xt) tally mesh")
+r_0 = 4.75 * 2.54
 mesh = openmc.CylindricalMesh(
-    r_grid=np.linspace(4.75 * 2.54, breeder_thickness, 100),
+    r_grid=np.linspace(r_0, r_0 + breeder_thickness, 100),
     phi_grid=np.linspace(0, 2 * np.pi, 100),
     z_grid=np.linspace(0, breeder_height, 100),
 )
