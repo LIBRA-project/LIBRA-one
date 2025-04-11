@@ -11,6 +11,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # might be missing these libs in the runner. Let's check in a few days if that's still needed
+      - run: sudo apt install libopenblas-base libopenblas-dev
+
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
         with:
