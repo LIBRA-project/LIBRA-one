@@ -2,12 +2,13 @@ import festim as F
 import openmc2dolfinx
 from festim.helpers import nmm_interpolate
 import dolfinx
+import ufl
 from dolfinx.io import gmshio, XDMFFile
 from mpi4py import MPI
 
 from create_mesh import gmsh, mesh_comm, model_rank
 
-irradiation_time = 10  # s
+irradiation_time = 100  # s
 neutron_rate = 1e8  # n/s
 percm3_to_perm3 = 1e6
 
@@ -22,6 +23,9 @@ mesh_source.geometry.x[:, 2] += -0.45
 t_production.x.array[:] *= neutron_rate  # T/n/cm3 to T/s/cm3
 t_production.x.array[:] *= percm3_to_perm3  # T/s/cm3 to T/s/m3
 
+dx = ufl.Measure("dx", domain=mesh_source)
+total_t_production = dolfinx.fem.assemble_scalar(dolfinx.fem.form(t_production * dx))
+print(f"TBR: {total_t_production/neutron_rate} T/n")
 
 mesh, ct, ft = gmshio.model_to_mesh(gmsh.model, comm=mesh_comm, rank=model_rank)
 
@@ -87,10 +91,10 @@ model = F.HydrogenTransportProblem()
 model.volume_meshtags = ct
 model.facet_meshtags = ft
 
-salt = F.Material(D_0=0.5, E_D=0)
+flibe_salt = F.Material(D_0=3.12e-7, E_D=0.37)
 
 top_surface = F.SurfaceSubdomain(id=1)
-volume = F.VolumeSubdomain(id=1, material=salt)
+volume = F.VolumeSubdomain(id=1, material=flibe_salt)
 model.subdomains = [top_surface, volume]
 
 model.mesh = F.Mesh(mesh)
@@ -108,9 +112,9 @@ model.sources = [
     )
 ]
 
-model.temperature = 650.0
+model.temperature = 850.0
 
-model.settings = F.Settings(atol=1e-10, rtol=1e-10, final_time=100)
+model.settings = F.Settings(atol=1e-10, rtol=1e-14, final_time=10 * 365 * 24 * 3600)
 
 model.settings.stepsize = F.Stepsize(
     0.1,
@@ -137,21 +141,31 @@ model.run()
 import matplotlib.pyplot as plt
 from scipy.integrate import cumulative_trapezoid
 import numpy as np
+from libra_toolbox.tritium.plotting import quantity_to_activity
+from libra_toolbox.tritium import ureg
 
 wedge_angle = 22.5  # degrees
+release_rate.data = np.array(release_rate.data) * 360 / wedge_angle
+
+
 cumulative_release = cumulative_trapezoid(release_rate.data, release_rate.t, initial=0)
 
-release_rate.data = (
-    np.array(release_rate.data) * 360 / wedge_angle
-)  # convert to release rate in cm2/s
+cumulative_release *= ureg.particle
+release_rate.data *= ureg.particle / ureg.s
+release_rate.t = np.array(release_rate.t) * ureg.s
 
 fig, axs = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
+axs[0].plot(
+    release_rate.t.to(ureg.years).magnitude,
+    quantity_to_activity(release_rate.data).to(ureg.Bq / ureg.day).magnitude,
+)
+axs[0].set_ylabel("Release Rate (Bq/day)")
 
-axs[0].plot(release_rate.t, release_rate.data)
-axs[0].set_ylabel("Release Rate (/s)")
-
-axs[1].plot(release_rate.t, cumulative_release)
-axs[1].set_xlabel("Time (s)")
-axs[1].set_ylabel("Cumulative Release (#)")
+axs[1].plot(
+    release_rate.t.to(ureg.years).magnitude,
+    quantity_to_activity(cumulative_release).to(ureg.Bq).magnitude,
+)
+axs[1].set_xlabel("Time (years)")
+axs[1].set_ylabel("Cumulative Release (Bq)")
 
 plt.show()
