@@ -5,6 +5,7 @@ import dolfinx
 import ufl
 from dolfinx.io import gmshio, XDMFFile
 from mpi4py import MPI
+import numpy as np
 
 from create_mesh import gmsh, mesh_comm, model_rank
 
@@ -19,6 +20,18 @@ mesh_source = t_production.function_space.mesh
 mesh_source.geometry.x[:] *= 1e-2  # cm to m
 mesh_source.geometry.x[:, 1] += -0.027
 mesh_source.geometry.x[:, 2] += -0.45
+
+# rotate 15 degrees around z axis
+angle = 15 * 3.14159 / 180
+rotation_matrix = [
+    [np.cos(angle), -np.sin(angle), 0],
+    [np.sin(angle), np.cos(angle), 0],
+    [0, 0, 1],
+]
+mesh_source.geometry.x[:] = np.dot(
+    mesh_source.geometry.x[:], rotation_matrix
+)  # rotate around z axis
+
 
 t_production.x.array[:] *= neutron_rate  # T/n/cm3 to T/s/cm3
 t_production.x.array[:] *= percm3_to_perm3  # T/s/cm3 to T/s/m3
@@ -57,6 +70,12 @@ with XDMFFile(MPI.COMM_WORLD, "ft.xdmf", "w") as xdmf:
 with XDMFFile(MPI.COMM_WORLD, "t_production.xdmf", "w") as xdmf:
     xdmf.write_mesh(mesh)
     xdmf.write_function(t_production_on_wedge)
+
+with XDMFFile(MPI.COMM_WORLD, "t_production_from_openmc.xdmf", "w") as xdmf:
+    xdmf.write_mesh(mesh_source)
+    xdmf.write_function(t_production)
+
+exit()
 
 
 # NOTE need to override these methods in ParticleSource until a
