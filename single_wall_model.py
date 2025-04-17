@@ -254,7 +254,10 @@ def build_libra_xl(
     # heater_reentrant_2 center: theta = 45 degrees
     # heater_reentrant_3 center: theta = 75 degrees
 
-    heater_R = 1 / 2 * (outer_cyl_1.r + inner_cyl_2.r)
+    # heater_R = 1 / 2 * (outer_cyl_1.r + inner_cyl_2.r)
+    heater_R = inner_cyl_2.r + 0.75 * (
+        outer_cyl_1.r - inner_cyl_2.r
+    )  # adapted from the CAD geometry
 
     heater_reentrant_1_in_cyl = openmc.ZCylinder(
         r=2.34,
@@ -288,8 +291,8 @@ def build_libra_xl(
         x0=heater_R * np.cos(np.deg2rad(75)),
         y0=heater_R * np.sin(np.deg2rad(75)),
     )
-    heater_reentrant_bot_plane_1 = openmc.ZPlane(25.60)
-    heater_reentrant_bot_plane_2 = openmc.ZPlane(25.80)
+    heater_reentrant_bot_plane_1 = openmc.ZPlane(7.60)
+    heater_reentrant_bot_plane_2 = openmc.ZPlane(7.80)
 
     # print(source_z_point)
 
