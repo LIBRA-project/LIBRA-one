@@ -1,6 +1,9 @@
 import numpy as np
 import openmc
 
+
+inch_to_cm = 2.54
+
 # Using 2:1 atom ratio of LiF to BeF2, similar to values in
 # Seifried, Jeffrey E., et al. ‘A General Approach for Determination of
 # Acceptable FLiBe Impurity Concentrations in Fluoride-Salt Cooled High
@@ -31,7 +34,7 @@ graphite.add_element("C", 0.999999, "wo")
 def build_libra_xl(
     salt_material=flibe_nat,
     multiplier_material=beryllium,
-    multiplier_thickness=2.0 * 2.54,
+    multiplier_thickness=2.0 * inch_to_cm,
     reflector_material=graphite,
     salt_thickness=40,
     salt_height=80,
@@ -216,10 +219,10 @@ def build_libra_xl(
 
     libra_wall_th = 0.3175  # 1/8 inch
     gap_thickness = 0.635  # 1/4 inch
-    salt_headspace = 8 * 2.54
-    multiplier_height = 5.0 * 2 * 2.54
-    # shield_thickness = 6*2.54
-    support_plate_thickness = 2.54
+    salt_headspace = 8 * inch_to_cm
+    multiplier_height = 5.0 * 2 * inch_to_cm
+    # shield_thickness = 6*inch_to_cm
+    support_plate_thickness = inch_to_cm
     # Tank double wall surfaces
 
     # GEOMETRY
@@ -227,8 +230,8 @@ def build_libra_xl(
     x0_plane = openmc.XPlane(0.0)
     y0_plane = openmc.YPlane(0.0)
 
-    inner_cyl_1 = openmc.ZCylinder(r=4.5 * 2.54)
-    inner_cyl_2 = openmc.ZCylinder(r=4.75 * 2.54)
+    inner_cyl_1 = openmc.ZCylinder(r=4.5 * inch_to_cm)
+    inner_cyl_2 = openmc.ZCylinder(r=inner_cyl_1.r + 0.25 * inch_to_cm)
 
     z_plane_1 = openmc.ZPlane(0.0)
     z_plane_2 = openmc.ZPlane(libra_wall_th)
@@ -265,7 +268,7 @@ def build_libra_xl(
         y0=heater_R * np.sin(np.deg2rad(15)),
     )
     heater_reentrant_1_out_cyl = openmc.ZCylinder(
-        r=2.54,
+        r=inch_to_cm,
         x0=heater_R * np.cos(np.deg2rad(15)),
         y0=heater_R * np.sin(np.deg2rad(15)),
     )
@@ -276,7 +279,7 @@ def build_libra_xl(
         y0=heater_R * np.sin(np.deg2rad(45)),
     )
     heater_reentrant_2_out_cyl = openmc.ZCylinder(
-        r=2.54,
+        r=inch_to_cm,
         x0=heater_R * np.cos(np.deg2rad(45)),
         y0=heater_R * np.sin(np.deg2rad(45)),
     )
@@ -287,7 +290,7 @@ def build_libra_xl(
         y0=heater_R * np.sin(np.deg2rad(75)),
     )
     heater_reentrant_3_out_cyl = openmc.ZCylinder(
-        r=2.54,
+        r=inch_to_cm,
         x0=heater_R * np.cos(np.deg2rad(75)),
         y0=heater_R * np.sin(np.deg2rad(75)),
     )
@@ -301,16 +304,17 @@ def build_libra_xl(
     multiplier_bot_plane = openmc.ZPlane(source_z_point - multiplier_height / 2)
     multiplier_top_plane = openmc.ZPlane(source_z_point + multiplier_height / 2)
 
-    multiplier_inner_cyl = openmc.ZCylinder(r=0.5 * 2.54)
+    multiplier_inner_cyl = openmc.ZCylinder(r=0.5 * inch_to_cm)
     multiplier_outer_cyl = openmc.ZCylinder(
         r=multiplier_inner_cyl.r + multiplier_thickness
     )
 
     vacuum_insulation_inner_cyl = openmc.ZCylinder(
-        r=multiplier_outer_cyl.r + (1 / 8) * 2.54
+        r=multiplier_outer_cyl.r + (1 / 8) * inch_to_cm
     )
-    vacuum_insulation_outer_cyl = openmc.ZCylinder(r=inner_cyl_1.r - (1 / 8) * 2.54)
-
+    vacuum_insulation_outer_cyl = openmc.ZCylinder(
+        r=inner_cyl_1.r - (1 / 8) * inch_to_cm
+    )
     support_plate_bot_plane = openmc.ZPlane(z_plane_1.z0 - support_plate_thickness)
 
     reflector_bot_plane = openmc.ZPlane(
