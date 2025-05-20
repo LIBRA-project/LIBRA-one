@@ -10,8 +10,12 @@ import openmc
 flibe_nat = openmc.Material(name="Flibe_nat")
 # Flibe_nat.temperature = 700 + 273
 flibe_nat.add_element("Be", 0.142857, "ao")
-flibe_nat.add_nuclide("Li6", 0.021685, "ao")
-flibe_nat.add_nuclide("Li7", 0.264029, "ao")
+
+li_fraction = 0.285714
+li6_enrichment = 0.075
+flibe_nat.add_nuclide("Li6", li_fraction * li6_enrichment, "ao")
+flibe_nat.add_nuclide("Li7", li_fraction * (1 - li6_enrichment), "ao")
+
 flibe_nat.add_element("F", 0.571429, "ao")
 flibe_nat.set_density("g/cm3", 1.94)
 

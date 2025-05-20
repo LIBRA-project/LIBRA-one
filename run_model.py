@@ -20,8 +20,8 @@ args, unknown = parser.parse_known_args()
 
 reflector_thickness = 10
 
-breeder_height = 80
-breeder_thickness = 40
+breeder_height = 130
+breeder_thickness = 70
 
 
 # Name: Portland concrete
@@ -71,7 +71,9 @@ libra_reg, libra_system_cell, materials, src, salt_cell, salt_material, salt_vol
     single_wall_model.build_libra_xl(
         salt_height=breeder_height,
         salt_thickness=breeder_thickness,
-        reflector_thickness=reflector_thickness,
+        reflector_thickness=0,
+        reflector_material=None,
+        multiplier_material=None,
     )
 )
 materials.append(Concrete)
