@@ -25,7 +25,7 @@ def um_tally_to_vtk(filename: str, statepoint: str, tally_name: str):
 
 if __name__ == "__main__":
 
-    tally_names = ['flux_um', 'tbr_um']
+    tally_names = ['nflux_um', 'tbr_um']
 
     for t in tally_names:
 

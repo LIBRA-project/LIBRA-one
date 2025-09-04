@@ -24,6 +24,66 @@ def create_mesh_h5m():
     return
 
 
+def create_mesh_h5m_v1():
+    # Assign materials to volumes
+    inconel_vol = [1, 2, 3, 4, 5, 6, 7, 13, 14, 15]
+    ss304_vol = [10, 11, 12, 16]
+    beryllium_vol = [8]
+    void_vol = []
+    flibe_vol = [9]
+    graphite_vol = [17, 18, 19]
+
+    # define material map
+    group_map = {('mat:inconel625', 2): inconel_vol,
+                 ('mat:beryllium', 3): beryllium_vol,
+                 ('mat:void', 4): void_vol,
+                 ('mat:flibe', 5): flibe_vol,
+                 ('mat:SS304', 6): ss304_vol,
+                 ('mat:graphite', 7): graphite_vol}
+
+    # create pydagmc model
+    model = pydagmc.Model('libra_one_v1.mesh.rtt')
+    # assign materials to volumes
+    model.add_groups(group_map)
+    model.mb.write_file('libra_one_v1.mesh.h5m')
+
+    return
+
+
+def create_mesh_h5m_v2():
+    # Assign materials to volumes
+    inconel_vol = [1, 2, 3, 4, 5, 6, 7, 13, 14, 15]
+    ss304_vol = [10, 11, 12, 16]
+    beryllium_vol = [8]
+    void_vol = [20]
+    flibe_vol = [9]
+    graphite_vol = [17, 18, 19]
+
+    # define material map
+    group_map = {('mat:inconel625', 2): inconel_vol,
+                 ('mat:beryllium', 3): beryllium_vol,
+                 ('mat:void', 4): void_vol,
+                 ('mat:flibe', 5): flibe_vol,
+                 ('mat:SS304', 6): ss304_vol,
+                 ('mat:graphite', 7): graphite_vol}
+
+    # create pydagmc model
+    model = pydagmc.Model('libra_one_v2.mesh.rtt')
+    # assign materials to volumes
+    model.add_groups(group_map)
+    model.mb.write_file('libra_one_v2.mesh.h5m')
+
+    return
+
+
+def rtt_to_h5m_nomat():
+    # create pydagmc model
+    model = pydagmc.Model('libra_one_v1.mcnp.mesh.rtt')
+    model.mb.write_file('libra_one_v1.mcnp.mesh.h5m')
+
+    return
+
+
 def openmc_model():
 
     model = openmc.Model()
@@ -44,6 +104,25 @@ def openmc_model():
     inconel625.add_element("Nb", 0.036500, "wo")
     inconel625.add_element("Mo", 0.090000, "wo")
     inconel625.set_density("g/cm3", 8.44)
+
+    # Stainless Steel 304 from PNNL Materials Compendium (PNNL-15870 Rev2)
+    SS304 = openmc.Material(name="Stainless Steel 304")
+    # SS304.temperature = 700 + 273
+    SS304.add_element("C", 0.000800, "wo")
+    SS304.add_element("Mn", 0.020000, "wo")
+    SS304.add_element("P", 0.000450, "wo")
+    SS304.add_element("S", 0.000300, "wo")
+    SS304.add_element("Si", 0.010000, "wo")
+    SS304.add_element("Cr", 0.190000, "wo")
+    SS304.add_element("Ni", 0.095000, "wo")
+    SS304.add_element("Fe", 0.683450, "wo")
+    SS304.set_density("g/cm3", 8.00)
+
+    # Graphite (reactor-grade) from PNNL Materials Compendium (PNNL-15870 Rev2)
+    graphite = openmc.Material(name='Graphite')
+    graphite.set_density('g/cm3', 1.7)
+    graphite.add_element('B', 0.000001, 'wo')
+    graphite.add_element('C', 0.999999, 'wo')
 
     beryllium = openmc.Material(name="beryllium")
     beryllium.add_element("Be", 1.000000, "wo")
@@ -84,18 +163,23 @@ def openmc_model():
     unstructured_mesh.output = False
     um_filter = openmc.MeshFilter(unstructured_mesh)
 
-    tally = openmc.Tally(name='flux_um')
-    tally.filters = [um_filter]
-    tally.scores = ['flux']
-    model.tallies.append(tally)
+    # tally = openmc.Tally(name='nflux_um')
+    # tally.filters = [um_filter]
+    # tally.scores = ['flux']
+    # model.tallies.append(tally)
 
-    tally = openmc.Tally(name='tbr_um')
-    tally.filters = [um_filter]
+    # tally = openmc.Tally(name='tbr_um')
+    # tally.filters = [um_filter]
+    # tally.scores = ['(n,Xt)']
+    # model.tallies.append(tally)
+
+    tally = openmc.Tally(name='tbr_cell')
+    tally.filters = [openmc.CellFilter([1, 15])]
     tally.scores = ['(n,Xt)']
     model.tallies.append(tally)
 
-    tally = openmc.Tally(name='tbr')
-    tally.filters = [openmc.CellFilter([15])]
+    tally = openmc.Tally(name='tbr_mat')
+    tally.filters = [openmc.MaterialFilter([beryllium, flibe])]
     tally.scores = ['(n,Xt)']
     model.tallies.append(tally)
 
